@@ -1,0 +1,10 @@
+--Function that takes the data and parses it for use with categorising
+    - Web viewer/large data file
+
+--Funciton that pulls the data from the f1 json stream for use
+
+--Full collection of functionality
+    - Interactive map that lets you choose a race, lap, session etc. for any driver and team in the database
+    and see the telemetry for that specific stint.
+
+--Functions that parse the data for use
