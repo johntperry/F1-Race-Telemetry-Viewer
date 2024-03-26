@@ -46,6 +46,53 @@ def load(filename):
 data = {'year': 2014, 'round': 10, 'circuits': 'monza', 'constructors': 'mercedes', 'drivers': 'hamilton',
          'grid': 14, 'results': 4, 'fastest': 2, 'status': 'statusId', 'datatype': 'standings', 'lap': 24, 'pit_num': 1}
 
+'''
+datatypes include:
+    - seasons
+    - races
+    - results
+    - qualifying
+    - driverStandings
+    - constructorStandings
+    - drivers
+    - constructors
+    - circuits
+    - status
+    - laps
+    - pitstops
+'''
+
+"""
+Data that can be included in the request includes:
+    - Season: tuple that can contain a circuitId, constructorId, driverId, grid position,
+            results position, fastest rank, statusId (if none lists currently supported seasons)
+    - Race: tuple that can contain a circuitId, constructorId, driverId, grid position, 
+            results position, fastest rank, statusId (if just year lists race schedule, info
+            about specific race add round number)
+    - Race Results: tuple that can contain a circuitId, constructorId, driverId, grid position,
+                    fastest rank, statusId (if just race lists the results)
+    - Quali Results: tuple that can contain circuitId, constructorId, driverId, grid position,
+                    results position, fastest rank, statusId (if just race lists the quali results)
+    - Standings: can request after a specific race, at end of season, all those who finished
+                at a point in the standings for a season, results for a specific driver, results
+                for a specific constructor
+    - Driver info: tuple that can contain a circuitId, constructorId, driverId, grid position,
+                    results position, fastest rank, statusId, can also request list of drivers in
+                    a series, year or round
+    - Constructor info: tuple that can contain circuitId, constructorId, driverId, grid position,
+                        results position, fastest rank, statusId, can also request list of
+                        constructors in a series year or round.
+    - Circuit info: tuple that can contain constructorId, driverId, grid position, results position,
+                    fastest rank, statusId, can also obtain the list of circuits used within a 
+                    series, year or round.
+    - Finishing status: tuple that can contain circuitId, constructorId, driverId, grid position,
+                        results position, fastest rank, statusId, can just obtain list of finishing
+                        status codes.
+    - Lap times: need to specify the season, round and lap number. can also include driver data.
+    - Pit stops: need to specify a season and round, can request all data for a round or a stop number,
+                can also include driver data or lap number
+"""
+
 def fetch_f1_data(data, limit=30, use_cache=True):
     """
     Fetch data from Ergast for data types specifically requested, returning
@@ -62,74 +109,29 @@ def fetch_f1_data(data, limit=30, use_cache=True):
         Requested data as a .json file
     """
 
-    """
-    Data that can be included in the request includes:
-        - Season: tuple that can contain a circuitId, constructorId, driverId, grid position,
-                results position, fastest rank, statusId (if none lists currently supported seasons)
-        - Race: tuple that can contain a circuitId, constructorId, driverId, grid position, 
-                results position, fastest rank, statusId (if just year lists race schedule, info
-                about specific race add round number)
-        - Race Results: tuple that can contain a circuitId, constructorId, driverId, grid position,
-                        fastest rank, statusId (if just race lists the results)
-        - Quali Results: tuple that can contain circuitId, constructorId, driverId, grid position,
-                        results position, fastest rank, statusId (if just race lists the quali results)
-        - Standings: can request after a specific race, at end of season, all those who finished
-                    at a point in the standings for a season, results for a specific driver, results
-                    for a specific constructor
-        - Driver info: tuple that can contain a circuitId, constructorId, driverId, grid position,
-                        results position, fastest rank, statusId, can also request list of drivers in
-                        a series, year or round
-        - Constructor info: tuple that can contain circuitId, constructorId, driverId, grid position,
-                            results position, fastest rank, statusId, can also request list of
-                            constructors in a series year or round.
-        - Circuit info: tuple that can contain constructorId, driverId, grid position, results position,
-                        fastest rank, statusId, can also obtain the list of circuits used within a 
-                        series, year or round.
-        - Finishing status: tuple that can contain circuitId, constructorId, driverId, grid position,
-                            results position, fastest rank, statusId, can just obtain list of finishing
-                            status codes.
-        - Lap times: need to specify the season, round and lap number. can also include driver data.
-        - Pit stops: need to specify a season and round, can request all data for a round or a stop number,
-                    can also include driver data or lap number
-    """
-    # URL for retreiving data from the Ergast API:
-
-    url = """http://ergast.com/api/f1/{data}.json?limit={limit}"""
-
     sub_dir = 'cache'
 
+    for key in data:
+        if data[key] == None:
+            break
+        if key == 'datatype':
+            break
+        if key == 'year' or 'round':
+            stringtype = {key: f"{data[key]}/"}
+            data.update(stringtype)
+            break
+        stringtype = {key: f"{key}/{data[key]}/"}
+        data.update(stringtype)
 
-    if data['datatype'] == 'seasons':                   # Lists the seasons
-        for i in data:
-            if data[i] == None or 'seasons':
-                sub_str = 'seasons'
-            else:
-                break
-        sub_str = "{year}/{round}/{circuits}/{drivers}/{grid}/{results}/{fastest}/{status}/"
-        sub_str.format(data['year'], data['round'], data['circuits'], data['drivers'], data['grid'],
-                       data['results'], data['fastest'], data['status'])
-    elif data['datatype'] == 'races':                   # Lists the races
-        pass
-    elif data['datatype'] == 'results':                 # Lists the race results
-        pass
-    elif data['datatype'] == 'qualifying':              # Lists the qualifying results
-        pass
-    elif data['datatype'] == 'driverStandings':         # Lists the driver standings
-        pass
-    elif data['datatype'] == 'constructorStandings':    # Lists the constructor standings
-        pass
-    elif data['datatype'] == 'drivers':                 # Lists the drivers
-        pass
-    elif data['datatype'] == 'constructors':            # Lists the constructors
-        pass
-    elif data['datatype'] == 'circuits':                # Lists the circuits
-        pass
-    elif data['datatype'] == 'status':                  # Lists the finishing status codes
-        pass
-    elif data['datatype'] == 'laps':                    # Gives the lap times
-        pass
-    elif data['datatype'] == 'pitstops':                # Lists the pit stops
-        pass
+    # URL for retreiving data from the Ergast API:
+    url = """http://ergast.com/api/f1/{year}{round}{circuits}{constructors}{drivers}{grid}{results}{fastest}
+                {status}{datatype}{lap}{pit_num}.json?limit={limit}"""
+    
+    url.format(data['year'], data['round'], data['circuits'], data['constructors'], data['drivers'],
+               data['grid'], data['results'], data['fastest'], data['status'], data['datatype'],
+               data['lap'], data['pit_num'], limit)
+
+    
 
     ### Make seperate caches for different strings of information that are called
     try:
@@ -144,10 +146,10 @@ def fetch_f1_data(data, limit=30, use_cache=True):
     if use_cache:
         try:
             # Attempt to load data from file
-            data = load(cache_file)
+            data_found = load(cache_file)
         except FileNotFoundError:
             # If load from file fails, fetch and dump to file
-            data = fetch(url.format(data, limit))
-            dump(data, cache_file)
+            data_found = fetch(url)
+            dump(data_found, cache_file)
 
-    return data
+    return data_found
