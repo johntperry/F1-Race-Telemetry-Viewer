@@ -6,6 +6,7 @@ such that it can be properly used in further parsing functions
 import json
 import os
 import requests
+from data import formatting_dict
 
 def fetch(url):
     """Fetch data from url and return a JSON object"""
@@ -93,7 +94,7 @@ Data that can be included in the request includes:
                 can also include driver data or lap number
 """
 
-def fetch_f1_data(data, limit=30, use_cache=True):
+def fetch_f1_data(data, limit=30, use_cache=False):
     """
     Fetch data from Ergast for data types specifically requested, returning
     as a JSON object.
@@ -109,20 +110,21 @@ def fetch_f1_data(data, limit=30, use_cache=True):
         Requested data as a .json file
     """
 
-    sub_dir = 'cache'
+    #sub_dir = 'cache'
 
     for key in data:
         if data[key] == None:
-            break
-        if key == 'datatype':
-            break
-        if key == 'year' or 'round':
-            stringtype = {key: f"{data[key]}/"}
-            data.update(stringtype)
-            break
-        stringtype = {key: f"{key}/{data[key]}/"}
-        data.update(stringtype)
+            pass
+        elif key == 'datatype':
+            pass
+        elif key == 'year' or 'round':
+            data[key] = f"{data[key]}/"
+            pass
+        else:
+            data[key] = f"{key}/{data[key]}/"
 
+    data.format(formatting_dict())
+    print(data['year'])
     # URL for retreiving data from the Ergast API:
     url = """http://ergast.com/api/f1/{year}{round}{circuits}{constructors}{drivers}{grid}{results}{fastest}
                 {status}{datatype}{lap}{pit_num}.json?limit={limit}"""
@@ -133,7 +135,7 @@ def fetch_f1_data(data, limit=30, use_cache=True):
 
     
 
-    ### Make seperate caches for different strings of information that are called
+    """### Make seperate caches for different strings of information that are called
     try:
         os.makedirs(sub_dir)
     except FileExistsError:
@@ -150,7 +152,9 @@ def fetch_f1_data(data, limit=30, use_cache=True):
         except FileNotFoundError:
             # If load from file fails, fetch and dump to file
             data_found = fetch(url)
-            dump(data_found, cache_file)
+            dump(data_found, cache_file)"""
+    
+    data_found = fetch(url)
 
     return data_found
 
