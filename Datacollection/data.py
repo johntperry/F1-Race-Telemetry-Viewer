@@ -1,6 +1,6 @@
 class NoneInStr():
     def __format__(self, spec):
-        return ''
+        return '~'
     def __getitem__(self, name):
         return self
     
@@ -13,3 +13,9 @@ class formatting_dict(dict):
         if isinstance(value, dict):
             value = type(self)(value)
         return value if value is not None else NoneInStr
+    
+data = {'n': 3, 'k': 3.141594, 'p': {'a': 7, 'b': 8}}
+del data['k']
+data['p']['b'] = None
+
+print('{0[n]}, {0[k]:.2f}, {0[p][a]}, {0[p][b]}'.format(formatting_dict(data)))

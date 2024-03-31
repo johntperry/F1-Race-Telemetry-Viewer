@@ -6,7 +6,10 @@ such that it can be properly used in further parsing functions
 import json
 import os
 import requests
-from .data import formatting_dict
+from urllib.parse import urlencode
+#from data import formatting_dict
+
+#def make_url(base_url, )
 
 def fetch(url):
     """Fetch data from url and return a JSON object"""
@@ -43,9 +46,6 @@ def load(filename):
     - statusId
     - data type: e.g. season, race, race results along with the intended 'type' of data type
 """
-
-data = {'year': 2014, 'round': 10, 'circuits': 'monza', 'constructors': 'mercedes', 'drivers': 'hamilton',
-         'grid': 14, 'results': 4, 'fastest': 2, 'status': 'statusId', 'datatype': 'standings', 'lap': 24, 'pit_num': 1}
 
 '''
 datatypes include:
@@ -110,32 +110,34 @@ def fetch_f1_data(data, limit=30, use_cache=False):
         Requested data as a .json file
     """
 
-    #sub_dir = 'cache'
+    sub_dir = 'cache'
 
     for key in data:
         if data[key] == None:
-            pass
+            data[key] = ''
         elif key == 'datatype':
             pass
-        elif key == 'year' or 'round':
+        elif key == 'year':
             data[key] = f"{data[key]}/"
-            pass
+        elif key == 'round':
+            data[key] = f"{data[key]}/"
         else:
             data[key] = f"{key}/{data[key]}/"
 
-    data.format(formatting_dict())
-    print(data['year'])
     # URL for retreiving data from the Ergast API:
-    url = """http://ergast.com/api/f1/{year}{round}{circuits}{constructors}{drivers}{grid}{results}{fastest}
-                {status}{datatype}{lap}{pit_num}.json?limit={limit}"""
+    url = "http://ergast.com/api/f1/{}{}{}{}{}{}{}{}{}{}{}{}.json?limit={}".format(
+        data['year'], data['round'], data['circuits'], data['constructors'], data['drivers'], data['grid'],
+        data['results'], data['fastest'], data['status'], data['datatype'], data['lap'], data['pit_num'], limit)
     
-    url.format(data['year'], data['round'], data['circuits'], data['constructors'], data['drivers'],
-               data['grid'], data['results'], data['fastest'], data['status'], data['datatype'],
-               data['lap'], data['pit_num'], limit)
-
+    print(data)
+    print(data['year'])
     
+    #url.format(data['year'], data['round'], data['circuits'], data['constructors'], data['drivers'], data['grid'],
+    #           data['results'], data['fastest'], data['status'], data['datatype'], data['lap'], data['pit_num'], limit)
 
-    """### Make seperate caches for different strings of information that are called
+    print(url)
+
+    ### Make seperate caches for different strings of information that are called
     try:
         os.makedirs(sub_dir)
     except FileExistsError:
@@ -152,10 +154,10 @@ def fetch_f1_data(data, limit=30, use_cache=False):
         except FileNotFoundError:
             # If load from file fails, fetch and dump to file
             data_found = fetch(url)
-            dump(data_found, cache_file)"""
-    
-    data_found = fetch(url)
+            dump(data_found, cache_file)
+    else:
+        # Fetch and dump to file
+        data_found = fetch(url)
+        dump(data_found, cache_file)
 
     return data_found
-
-#test git sync
