@@ -6,7 +6,7 @@ such that it can be properly used in further parsing functions
 import json
 import os
 import requests
-from data import formatting_dict
+from .data import formatting_dict
 
 def fetch(url):
     """Fetch data from url and return a JSON object"""
