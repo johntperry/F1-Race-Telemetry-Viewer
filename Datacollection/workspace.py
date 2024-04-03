@@ -14,8 +14,24 @@ data = {'year': None,
         'pit_num': None
         }
 
+'''
+datatypes include:
+    - seasons
+    - races
+    - results
+    - qualifying
+    - driverStandings
+    - constructorStandings
+    - drivers
+    - constructors
+    - circuits
+    - status
+    - laps
+    - pitstops
+'''
+
 data['datatype'] = 'constructors'
 #data['constructors'] = 'redbull'
-data['drivers'] = 'ricciardo'
+data['drivers'] = 'alonso'
 
 print(fetch_f1_data(data))

@@ -34,36 +34,6 @@ def load(filename):
 
 
 """
-\"data\" object can contain the following information:
-    - year
-    - round
-    - circuitId
-    - constructorId
-    - driverId
-    - grid position
-    - results position
-    - fastest rank
-    - statusId
-    - data type: e.g. season, race, race results along with the intended 'type' of data type
-"""
-
-'''
-datatypes include:
-    - seasons
-    - races
-    - results
-    - qualifying
-    - driverStandings
-    - constructorStandings
-    - drivers
-    - constructors
-    - circuits
-    - status
-    - laps
-    - pitstops
-'''
-
-"""
 Data that can be included in the request includes:
     - Season: tuple that can contain a circuitId, constructorId, driverId, grid position,
             results position, fastest rank, statusId (if none lists currently supported seasons)
@@ -94,12 +64,12 @@ Data that can be included in the request includes:
                 can also include driver data or lap number
 """
 
-def fetch_f1_data(data, limit=30, use_cache=False):
+def fetch_f1_data(data, limit=30, use_cache=True):
     """
     Fetch data from Ergast for data types specifically requested, returning
     as a JSON object.
     
-    Fetched data is dumped to a cached file so on subsequent call it can optionally
+    Fetched data is dumped to a unique cached file so on subsequent call it can optionally
     be retreived from the cache file. This is faster than the retrieval over the 
     internet as well as not clogging up the Ergast servers.
     
@@ -124,25 +94,24 @@ def fetch_f1_data(data, limit=30, use_cache=False):
         else:
             data[key] = f"{key}/{data[key]}/"
 
-    # URL for retreiving data from the Ergast API:
-    url = "http://ergast.com/api/f1/{}{}{}{}{}{}{}{}{}{}{}{}.json?limit={}".format(
-        data['year'], data['round'], data['circuits'], data['constructors'], data['drivers'], data['grid'],
-        data['results'], data['fastest'], data['status'], data['datatype'], data['lap'], data['pit_num'], limit)
-    
-    print(data)
-    print(data['year'])
-    
-    #url.format(data['year'], data['round'], data['circuits'], data['constructors'], data['drivers'], data['grid'],
-    #           data['results'], data['fastest'], data['status'], data['datatype'], data['lap'], data['pit_num'], limit)
 
-    print(url)
+    # URL for retreiving data from the Ergast API:
+    sub_url = f"{data['year']}{data['round']}{data['circuits']}{data['constructors']}{data['drivers']}"\
+            f"{data['grid']}{data['results']}{data['fastest']}{data['status']}{data['datatype']}{data['lap']}"\
+            f"{data['pit_num']}"
+    print(sub_url)
+    url = "http://ergast.com/api/f1/{}.json?limit={}".format(sub_url, limit)
 
     ### Make seperate caches for different strings of information that are called
     try:
         os.makedirs(sub_dir)
     except FileExistsError:
         pass
-    cache_file = os.path.join(sub_dir, 'f1_data.json')
+
+    # Cache each request seperately in cache
+    cache_log = sub_url.replace("/", "_")
+    
+    cache_file = os.path.join(sub_dir, '{}.json'.format(cache_log))
 
 
     ### Make this so that it can retreive data from the correct cache if it exists
